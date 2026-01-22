@@ -1,1 +1,179 @@
-# datascience
+# ======================================
+# PRACTICAL 1: REGRESSION (IRIS DATASET)
+# ======================================
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_squared_error
+
+# Load Iris Dataset
+iris = load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+
+# ---------- SIMPLE LINEAR REGRESSION ----------
+# Predict petal length using sepal length
+
+X = df[['sepal length (cm)']]
+y = df['petal length (cm)']
+
+model = LinearRegression()
+model.fit(X, y)
+
+y_pred = model.predict(X)
+
+print("Simple Linear Regression")
+print("Intercept:", model.intercept_)
+print("Coefficient:", model.coef_[0])
+print("R2 Score:", r2_score(y, y_pred))
+print("MSE:", mean_squared_error(y, y_pred))
+
+# Plot
+plt.scatter(X, y)
+plt.plot(X, y_pred)
+plt.xlabel("Sepal Length")
+plt.ylabel("Petal Length")
+plt.title("Simple Linear Regression (Iris)")
+plt.show()
+
+# ---------- MULTIPLE LINEAR REGRESSION ----------
+# Predict petal length using sepal length & sepal width
+
+X2 = df[['sepal length (cm)', 'sepal width (cm)']]
+y2 = df['petal length (cm)']
+
+model2 = LinearRegression()
+model2.fit(X2, y2)
+
+print("\nMultiple Linear Regression")
+print("Intercept:", model2.intercept_)
+print("Coefficients:", model2.coef_)
+print("R2 Score:", model2.score(X2, y2))
+
+
+
+# ===========================================
+# PRACTICAL 2: LOGISTIC & DECISION TREE
+# ===========================================
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+import matplotlib.pyplot as plt
+
+# Load dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Convert to binary classification (Setosa vs Others)
+y_binary = (y == 0).astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y_binary, test_size=0.3, random_state=42)
+
+# ---------- LOGISTIC REGRESSION ----------
+
+lr = LogisticRegression(max_iter=2000)
+lr.fit(X_train, y_train)
+
+y_pred_lr = lr.predict(X_test)
+
+print("Logistic Regression")
+print("Accuracy:", accuracy_score(y_test, y_pred_lr))
+print("Precision:", precision_score(y_test, y_pred_lr))
+print("Recall:", recall_score(y_test, y_pred_lr))
+
+# ---------- DECISION TREE ----------
+
+dt = DecisionTreeClassifier(max_depth=3)
+dt.fit(X_train, y_train)
+
+y_pred_dt = dt.predict(X_test)
+
+print("\nDecision Tree Accuracy:", accuracy_score(y_test, y_pred_dt))
+
+plt.figure(figsize=(12,6))
+plot_tree(dt, feature_names=iris.feature_names,
+          class_names=["Other", "Setosa"], filled=True)
+plt.show()
+
+
+
+# ======================================
+# PRACTICAL 3: K-MEANS (IRIS DATASET)
+# ======================================
+
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Load data
+iris = load_iris()
+X = iris.data
+
+# ---------- ELBOW METHOD ----------
+
+wcss = []
+for k in range(1, 10):
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(X)
+    wcss.append(kmeans.inertia_)
+
+plt.plot(range(1, 10), wcss)
+plt.xlabel("Number of Clusters")
+plt.ylabel("WCSS")
+plt.title("Elbow Method (Iris)")
+plt.show()
+
+# ---------- APPLY K-MEANS ----------
+
+kmeans = KMeans(n_clusters=3)
+labels = kmeans.fit_predict(X)
+
+print("Silhouette Score:", silhouette_score(X, labels))
+
+# Visualization (Sepal Length vs Petal Length)
+plt.scatter(X[:,0], X[:,2], c=labels)
+plt.xlabel("Sepal Length")
+plt.ylabel("Petal Length")
+plt.title("K-Means Clustering (Iris)")
+plt.show()
+
+
+
+# ======================================
+# PRACTICAL 4: PCA (IRIS DATASET)
+# ======================================
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+
+# Load data
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# Standardize data
+X_scaled = StandardScaler().fit_transform(X)
+
+# Apply PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+print("Explained Variance Ratio:", pca.explained_variance_ratio_)
+print("Total Variance Explained:",
+      sum(pca.explained_variance_ratio_))
+
+# Visualization
+plt.scatter(X_pca[:,0], X_pca[:,1], c=y)
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA on Iris Dataset")
+plt.show()
